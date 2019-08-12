@@ -7,7 +7,9 @@ const cors = require('cors');
 const MOVIES = require('./moviedex.json');
 
 const app = express();
-app.use(morgan('dev'));
+// app.use(morgan('dev'));
+const morganSetting = process.env.NODE_ENV === 'production' ? 'tiny' : 'common';
+app.use(morgan(morganSetting));
 app.use(helmet());
 app.use(cors());
 
@@ -56,9 +58,20 @@ app.get('/movie', function searchBy(req, res) {
       }
 });
 
+app.use((error, req, res, next) => {
+    let response;
+    if (process.env.NODE_ENV === 'production') {
+        response = { error: {message: 'server error'}}
+    } else {
+        response = { error }
+    }
+    res.status(500).json(response);
+});
 
-const PORT = 8000;
+// const PORT = 8000;
+const PORT = process.env.PORT || 8000;
 
 app.listen(PORT, () => {
-  console.log(`Server listening at http://localhost:${PORT}`);
+//   console.log(`Server listening at http://localhost:${PORT}`);
 });
+// ^ question for James, what to put here instead? 
